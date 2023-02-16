@@ -4,6 +4,5 @@ const orderController = require("../../controllers/payment");
 
 //POST : create payment
 router.post("/", makeCallback(orderController.createPayment));
-router.post("/exicute", makeCallback(orderController.exicutePayment));
 
 module.exports = router;
