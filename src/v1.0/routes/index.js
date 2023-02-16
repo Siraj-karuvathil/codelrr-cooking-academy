@@ -4,7 +4,12 @@ const auth = require("./auth");
 const course = require("./course");
 const student = require("./students");
 const gust = require("./gust");
-const { isUserAuthenticated, isSuperAdmin, isStudent } = require("../middlewares/authorizer");
+const payment = require("./payment");
+const {
+  isUserAuthenticated,
+  isSuperAdmin,
+  isStudent,
+} = require("../middlewares/authorizer");
 const { ensureRequestSanity } = require("../middlewares/request");
 
 // middleware
@@ -15,5 +20,5 @@ router.use("/auth", auth);
 router.use("/gust", gust);
 router.use("/course", [isUserAuthenticated, isSuperAdmin], course);
 router.use("/student", [isUserAuthenticated, isStudent], student);
-
+router.use("/success", payment);
 module.exports = router;
