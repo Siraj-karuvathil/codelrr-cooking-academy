@@ -3,8 +3,9 @@ var paypal = require("paypal-rest-sdk");
 const { addOrder } = require("./order");
 const { getCourseById } = require("../services/internal/course");
 const { getCartByUserId } = require("../services/internal/cart");
+
 paypal.configure({
-  mode: "sandbox", // or 'live'
+  mode: process.env.PAYPAL_MODE, // or 'live'
   client_id: process.env.PAYPAL_CLEINT_ID,
   client_secret: process.env.PAYPAL_CLEINT_SECRETE,
 });
@@ -53,16 +54,18 @@ const createPayment = async (req) => {
       ],
     };
 
-    paypal.payment.create(create_payment_json, function (error, payment) {
-      if (error) {
-        return { error };
-      } else {
-        for (let i = 0; i < payment.links.length; i++) {
-          if (payment.links[i].rel === "approval_url") {
-            return { data: payment.links[i].href };
+    return new Promise((resolve, reject) => {
+      paypal.payment.create(create_payment_json, function (error, payment) {
+        if (error) {
+          return { error };
+        } else {
+          const approvalURL = payment.links.find(link => link.rel === 'approval_url');
+          if(approvalURL) {
+            resolve({ data: approvalURL.href});
           }
+          reject('Approval url not found');
         }
-      }
+      });
     });
   } catch (error) {
     return { error };
