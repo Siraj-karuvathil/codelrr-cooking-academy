@@ -73,6 +73,7 @@ const exicutePayment = async (req) => {
   const payerId = req.query.PayerID;
   const userId = req?.user?._id;
   const cart = await getCartByUserId(userId);
+  console.log(cart);
   const execute_payment_json = {
     payer_id: payerId,
     transactions: [

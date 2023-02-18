@@ -29,7 +29,7 @@ app.use("/api", routes);
 
 // 404 error for any unknown api request
 app.use((_, res, next) => {
-    next(new NotFoundException());
+  next(new NotFoundException());
 });
 
 // centralized error handler
