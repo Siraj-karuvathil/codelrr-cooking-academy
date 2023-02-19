@@ -4,7 +4,6 @@ const auth = require("./auth");
 const course = require("./course");
 const student = require("./students");
 const gust = require("./gust");
-const payment = require("./payment");
 const {
   isUserAuthenticated,
   isSuperAdmin,
@@ -20,5 +19,4 @@ router.use("/auth", auth);
 router.use("/gust", gust);
 router.use("/course", [isUserAuthenticated, isSuperAdmin], course);
 router.use("/student", [isUserAuthenticated, isStudent], student);
-router.use("/success", payment);
 module.exports = router;
