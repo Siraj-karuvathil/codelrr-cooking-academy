@@ -1,6 +1,6 @@
 const messages = require("../../config/messages");
 var paypal = require("paypal-rest-sdk");
-const { addOrder } = require("./order");
+const statusCode = require("../../config/statusCode");
 const { getCourseById } = require("../services/internal/course");
 const { getCartByUserId } = require("../services/internal/cart");
 
@@ -12,9 +12,14 @@ paypal.configure({
 
 const createPayment = async (req) => {
   try {
-    // const { productIds, total } = req.body;
     const userId = req?.user?._id;
     const cart = await getCartByUserId(userId);
+    if (cart === null) {
+      return {
+        statusCode: statusCode.BAD_REQUEST,
+        message: "Cart is empty! please add items to cart.",
+      };
+    }
     const courses = new Map();
     await Promise.all(
       cart.itemId.map(async (courseId) => {
@@ -28,7 +33,7 @@ const createPayment = async (req) => {
         payment_method: "paypal",
       },
       redirect_urls: {
-        return_url: "http://localhost:3000/success",
+        return_url: `http://localhost:3000/api/2.0/success?UID=${userId}`,
         cancel_url: "http://localhost:3000/cancel",
       },
       transactions: [
@@ -59,11 +64,13 @@ const createPayment = async (req) => {
         if (error) {
           return { error };
         } else {
-          const approvalURL = payment.links.find(link => link.rel === 'approval_url');
-          if(approvalURL) {
-            resolve({ data: approvalURL.href});
+          const approvalURL = payment.links.find(
+            (link) => link.rel === "approval_url"
+          );
+          if (approvalURL) {
+            resolve({ data: approvalURL.href });
           }
-          reject('Approval url not found');
+          reject("Approval url not found");
         }
       });
     });
@@ -71,38 +78,6 @@ const createPayment = async (req) => {
     return { error };
   }
 };
-const exicutePayment = async (req) => {
-  const paymentId = req.query.paymentId;
-  const payerId = req.query.PayerID;
-  const userId = req?.user?._id;
-  const cart = await getCartByUserId(userId);
-  const execute_payment_json = {
-    payer_id: payerId,
-    transactions: [
-      {
-        amount: {
-          currency: "USD",
-          total: cart?.price,
-        },
-      },
-    ],
-  };
-
-  paypal.payment.execute(
-    paymentId,
-    execute_payment_json,
-    async function (error, payment) {
-      if (error) {
-        console.error(error);
-        return { error };
-      } else {
-        await addOrder(cart?.itemId);
-        return { data: payment };
-      }
-    }
-  );
-};
 module.exports = {
   createPayment,
-  exicutePayment,
 };
