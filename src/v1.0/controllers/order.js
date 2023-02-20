@@ -2,6 +2,7 @@ const messages = require("../../config/messages");
 const {
   getCourseById,
   editCourseById,
+  getCoursesById
 } = require("../services/internal/course");
 const {
   createOrder,
@@ -20,13 +21,16 @@ const {
 const { deleteCartByUserId } = require("./cart");
 
 const addOrder = async (productIds, userId) => {
-  productIds.map(async (itemId) => {
-    const course = await getCourseById(itemId);
+  const courses = await getCoursesById(productIds);
+  const subscriptionDatas = courses.map(course => {
     const subscriptionData = {
       userId,
       itemId: course._id,
       itemType: ITEM_TYPE_COURSE,
     };
+    return subscriptionData;
+  });
+  const orderItems = courses.map(course => {
     const orderItem = {
       itemId: course._id,
       itemType: ITEM_TYPE_COURSE,
@@ -34,19 +38,23 @@ const addOrder = async (productIds, userId) => {
       itemName: course.name,
       amount: course.price,
     };
-    const orderData = {
-      userId,
-      amount: course.price,
-      status: STATUS_COMPLETED,
-      items: [orderItem],
-    };
-    await createOrder(orderData);
-    await Promise.all([createSubscription(subscriptionData)]);
-    const subscriptionCount = await getSubscriptionCountByCourseId(itemId);
-    await editCourseById(itemId, { subscriptionCount });
-    await deleteCartByUserId(userId);
+    return orderItem;
   });
+  const orderData = {
+    userId,
+    amount: orderItems.reduce((acc, val) => acc + val.price, 0),
+    status: STATUS_COMPLETED,
+    items: orderItems,
+  };
+  const order = await createOrder(orderData);
+  await Promise.all(subscriptionDatas.map(subscriptionData => createSubscription(subscriptionData)));
+  await Promise.all(orderItems.map(async item => {
+    const subscriptionCount = await getSubscriptionCountByCourseId(item.itemId);
+    await editCourseById(item.itemId, { subscriptionCount });
+  }))
+  await deleteCartByUserId(userId);
   return {
+    orderId: order._id,
     message: messages?.orderAddedSuccess,
   };
 };

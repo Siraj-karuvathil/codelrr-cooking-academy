@@ -24,6 +24,14 @@ const getCourseById = async (courseId, select = null) => {
     return course;
 };
 
+const getCoursesById = async (courseIds, select = null) => {
+    const ids = courseIds.map(id => mongoose.Types.ObjectId(id));
+    const courses = await Course.find({ _id: {
+        $in: ids,
+    } }).select(select);
+    return courses;
+}
+
 const editCourseById = async (courseId, data) => {
     const id = mongoose.Types.ObjectId(courseId);
     return await Course.updateOne({ _id: id }, { $set: data });
@@ -46,4 +54,5 @@ module.exports = {
     deleteCourseById,
     getCourseById,
     isCourseSubscribed,
+    getCoursesById,
 };
