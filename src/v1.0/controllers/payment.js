@@ -22,9 +22,8 @@ const createPayment = async (req) => {
     }
     const courses = new Map();
     await Promise.all(
-      cart.itemId.map(async (courseId) => {
-        const course = await getCourseById(courseId);
-        courses.set(courseId, course);
+      cart.itemId.map(async (course) => {
+        courses.set(course?._id, course);
       })
     );
     const create_payment_json = {
@@ -39,8 +38,8 @@ const createPayment = async (req) => {
       transactions: [
         {
           item_list: {
-            items: cart.itemId.map((courseId) => {
-              const storeItem = courses.get(courseId);
+            items: cart.itemId.map((course) => {
+              const storeItem = courses.get(course._id);
               return {
                 name: storeItem.name,
                 sku: `product-${storeItem._id}`,

@@ -2,7 +2,6 @@ const messages = require("../../config/messages");
 const {
   getCourseById,
   editCourseById,
-  getCoursesById
 } = require("../services/internal/course");
 const {
   createOrder,
