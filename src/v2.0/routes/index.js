@@ -32,7 +32,7 @@ router.get("/success", async (req, res) => {
         return { error };
       } else {
         addOrder(cart?.itemId, userId).then((order) => {
-          res.redirect("http://localhost:3001/payment-success");
+          res.redirect("http://localhost:3001/payment-success" + `?orderId=${order.orderId}`);
         });
       }
     }

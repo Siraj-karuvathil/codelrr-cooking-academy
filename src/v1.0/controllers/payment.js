@@ -3,6 +3,7 @@ var paypal = require("paypal-rest-sdk");
 const statusCode = require("../../config/statusCode");
 const { getCourseById } = require("../services/internal/course");
 const { getCartByUserId } = require("../services/internal/cart");
+
 paypal.configure({
   mode: process.env.PAYPAL_MODE, // or 'live'
   client_id: process.env.PAYPAL_CLEINT_ID,
