@@ -33,4 +33,13 @@ module.exports = {
     // order id prefix
     ORDER_ID_PREFIX: "COOKINGACADEMY",
     ODRER_ID_PAD_LENGTH: 4,
+
+    // Status codes
+    BAD_REQUEST: 400,
+    UNAUTHORIZED: 401,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    NOT_ACCEPTABLE: 406,
+    TOO_MANY_REQUESTS: 429,
+    UNAUTHORIZED_DEVICE: 401,
 };

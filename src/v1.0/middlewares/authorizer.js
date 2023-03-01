@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../../config");
 const { STATUS_ACTIVE, YES, ROLE_SUPER_ADMIN, ROLE_STUDENT } = require("../../config/constants");
-const { UnauthorizedException } = require("../../utils/customExceptions");
+const { UnauthorizedException, ForbiddenException } = require("../../utils/customExceptions");
 const { getUserByMatch, getUserDeviceByMatch, getUserRoleByMatch, getUserById } = require("../services/internal/user");
 const { getRoleByName } = require("../services/internal/role");
 
@@ -26,14 +26,14 @@ const verifyResetPasswordToken = async (token) => {
 };
 
 const verifyAccessToken = async (token) => {
-    if (!token) throw new UnauthorizedException();
+    if (!token) throw new ForbiddenException("Token is required");
     let payload;
     try {
         payload = jwt.verify(token, config?.accessTokenSecret);
     } catch (error) {
         payload = null;
     }
-    if (!payload) throw new UnauthorizedException();
+    if (!payload) throw new ForbiddenException("Invalid Token");
     return payload;
 };
 
