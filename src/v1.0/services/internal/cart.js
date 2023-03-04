@@ -29,7 +29,7 @@ const deleteCartById = async (cartId, price, itemId) => {
 
 const updateCart = async (cartId, price, itemId) => {
   const id = mongoose.Types.ObjectId(cartId);
-  return await Cart.update({ _id: id }, { $push: { itemId }, $set: { price } });
+  return await Cart.updateOne({ _id: id }, { $push: { itemId }, $set: { price } });
 };
 
 module.exports = {
