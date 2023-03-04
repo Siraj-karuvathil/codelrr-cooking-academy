@@ -1,5 +1,5 @@
 const messages = require("../../config/messages");
-const { NOT_FOUND } = require("../../config/statusCode");
+const { NOT_FOUND, BAD_REQUEST } = require("../../config/statusCode");
 const { Cart } = require("../models");
 const {
   getCartByUserId,
@@ -22,9 +22,14 @@ const addToCart = async (req) => {
       message: messages.success,
     };
   }
-  const isPresent = cart.itemId.includes(req?.body?.itemId);
+  const isPresent = cart?.itemId.find((obj) => {
+    if (obj._id.equals(req?.body?.itemId)) {
+      return obj;
+    }
+  });
   if (isPresent) {
     return {
+      statusCode: BAD_REQUEST,
       message: messages.allreadyIn,
     };
   } else {
@@ -47,7 +52,7 @@ const removeFromCart = async (req) => {
     });
     if (isFound) {
       const price = cart.price - priceData.price;
-      await deleteCartById(cart._id, price, req?.body?.itemId);
+      await deleteCartById(cart._id, price, req?.body?.itemId); 
       return { message: messages?.cartItemRemovedSuccessfully };
     }
   }
