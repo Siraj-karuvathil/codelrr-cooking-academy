@@ -1,4 +1,5 @@
 const messages = require("../../config/messages");
+const { NOT_FOUND } = require("../../config/statusCode");
 const { Cart } = require("../models");
 const {
   getCartByUserId,
@@ -39,14 +40,21 @@ const removeFromCart = async (req) => {
   const cart = await getCartByUserId(req?.user?._id);
   const priceData = await getCourseById(req?.body?.itemId, "price");
   if (cart) {
-    const isPresent = cart.itemId.includes(req?.body?.itemId);
-    if (isPresent) {
+    const isFound = cart?.itemId.find((obj) => {
+      if (obj._id.equals(req?.body?.itemId)) {
+        return obj;
+      }
+    });
+    if (isFound) {
       const price = cart.price - priceData.price;
       await deleteCartById(cart._id, price, req?.body?.itemId);
       return { message: messages?.cartItemRemovedSuccessfully };
     }
   }
-  return { message: messages?.cartNotExist };
+  return {
+    statusCode: NOT_FOUND,
+    message: messages?.cartNotExist,
+  };
 };
 
 const getAllFromCart = async (req) => {
